@@ -38,7 +38,6 @@
       position: relative;
     }
 
-    /* ── BACKGROUND ORBS ── */
     .bg {
       position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
     }
@@ -53,7 +52,6 @@
     @keyframes drift2 { to { transform: translate(-40px, -50px); } }
     @keyframes drift3 { to { transform: translate(-40%, -60%); } }
 
-    /* ── NOISE OVERLAY ── */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 1;
@@ -62,7 +60,6 @@
       pointer-events: none;
     }
 
-    /* ── LAYOUT ── */
     .app {
       position: relative; z-index: 2;
       min-height: 100vh;
@@ -71,7 +68,6 @@
       gap: 20px;
     }
 
-    /* ── HEADER ── */
     header {
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
       background: var(--glass-bg);
@@ -105,16 +101,15 @@
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s ease-in-out infinite; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
-    /* ── MAIN CONTENT ── */
+    /* ── LAYOUT PRINCIPAL: PDF largo à esquerda, texto menor à direita ── */
     .main {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 3fr 2fr;   /* PDF ocupa 60%, texto 40% */
       gap: 20px;
       flex: 1;
       animation: fadeUp 0.7s 0.15s ease both;
     }
 
-    /* ── GLASS PANEL ── */
     .panel {
       background: var(--glass-bg);
       backdrop-filter: var(--blur);
@@ -143,18 +138,18 @@
     .panel-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
     .panel-body {
-      flex: 1; overflow: auto; padding: 16px;
+      padding: 16px 16px 0;
     }
 
     /* ── UPLOAD ZONE ── */
     .upload-zone {
       border: 1.5px dashed var(--glass-border-strong);
       border-radius: var(--radius-sm);
-      padding: 28px 20px;
+      padding: 22px 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       background: rgba(255,255,255,0.03);
       position: relative;
     }
@@ -166,11 +161,10 @@
     .upload-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    .upload-icon { font-size: 32px; margin-bottom: 8px; }
+    .upload-icon { font-size: 28px; margin-bottom: 6px; }
     .upload-text { font-size: 13px; font-weight: 500; color: var(--text-primary); }
-    .upload-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .upload-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
-    /* ── BUTTONS ── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 7px;
       padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer;
@@ -203,10 +197,9 @@
     .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
     .btn-row {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
     }
 
-    /* ── NAVIGATION ── */
     .nav-bar {
       display: none;
       align-items: center; justify-content: center; gap: 12px;
@@ -222,11 +215,13 @@
       font-family: 'Space Mono', monospace;
     }
 
-    /* ── PDF VIEWER ── */
+    /* ── PDF VIEWER — altura bem maior ── */
     .pdf-viewer-wrap {
-      flex: 1; overflow: auto;
+      flex: 1;
+      overflow: auto;
       display: flex; align-items: flex-start; justify-content: center;
-      padding: 16px; min-height: 420px;
+      padding: 16px;
+      min-height: 680px;   /* ← aumentado de 420 para 680 */
     }
     #pdfCanvas {
       border-radius: 8px;
@@ -236,12 +231,11 @@
     }
     .pdf-placeholder {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100%; min-height: 360px; gap: 12px; color: var(--text-muted);
+      height: 100%; min-height: 600px; gap: 12px; color: var(--text-muted);
     }
-    .pdf-placeholder .big { font-size: 48px; }
+    .pdf-placeholder .big { font-size: 64px; }
     .pdf-placeholder p { font-size: 13px; }
 
-    /* ── EXTRACTED TEXT ── */
     .text-output {
       flex: 1; overflow-y: auto;
       padding: 16px;
@@ -255,7 +249,6 @@
     }
     #extractedText.has-text { color: var(--text-primary); }
 
-    /* ── TRANSLATE PANEL ── */
     .translate-actions {
       padding: 14px 16px;
       border-top: 1px solid var(--glass-border);
@@ -264,7 +257,6 @@
     }
     .translate-hint { font-size: 11px; color: var(--text-muted); flex: 1; }
 
-    /* ── STATUS TOAST ── */
     #toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--glass-bg);
@@ -282,20 +274,18 @@
     #toast.err { color: #f87171; border-color: rgba(248,113,113,0.3); }
     #toast.info { color: var(--text-primary); }
 
-    /* ── SCROLL STYLING ── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 760px) {
-      .app { padding: 14px; gap: 14px; }
+    @media (max-width: 900px) {
       .main { grid-template-columns: 1fr; }
+      .app { padding: 14px; gap: 14px; }
+      .pdf-viewer-wrap { min-height: 500px; }
     }
   </style>
 </head>
@@ -309,7 +299,6 @@
 
 <div class="app">
 
-  <!-- HEADER -->
   <header>
     <div class="logo">
       <div class="logo-icon">🤟</div>
@@ -324,10 +313,9 @@
     </div>
   </header>
 
-  <!-- MAIN GRID -->
   <div class="main">
 
-    <!-- LEFT: VISUALIZADOR PDF -->
+    <!-- ESQUERDA: PDF (maior) -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-icon blue">📄</div>
@@ -337,23 +325,19 @@
         </div>
       </div>
 
-      <div class="panel-body" style="padding-bottom:0;">
-        <!-- Upload -->
+      <div class="panel-body">
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept=".pdf" onchange="loadPDF()">
           <div class="upload-icon">📂</div>
           <div class="upload-text">Arraste um PDF ou clique para selecionar</div>
           <div class="upload-sub">Somente arquivos .pdf</div>
         </div>
-
-        <!-- Actions -->
         <div class="btn-row">
           <button class="btn btn-primary" onclick="loadPDF()">⚡ Carregar</button>
           <button class="btn btn-ghost" onclick="clearAll()">🗑 Limpar</button>
         </div>
       </div>
 
-      <!-- Canvas -->
       <div class="pdf-viewer-wrap" id="pdfViewerWrap">
         <div class="pdf-placeholder" id="pdfPlaceholder">
           <div class="big">📋</div>
@@ -362,7 +346,6 @@
         <canvas id="pdfCanvas"></canvas>
       </div>
 
-      <!-- Navigation -->
       <div class="nav-bar" id="navBar">
         <button class="btn btn-ghost" onclick="previousPage()" style="padding:8px 14px;">← Anterior</button>
         <span class="page-badge" id="pageInfo">1 / 1</span>
@@ -370,7 +353,7 @@
       </div>
     </div>
 
-    <!-- RIGHT: TEXTO + LIBRAS -->
+    <!-- DIREITA: Texto + Libras -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-icon purple">📝</div>
@@ -393,10 +376,8 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- VLIBRAS -->
 <div vw class="enabled">
   <div vw-access-button class="active"></div>
   <div vw-plugin-wrapper>
@@ -404,15 +385,25 @@
   </div>
 </div>
 
-<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  new window.VLibras.Widget({ rootPath: 'https://vlibras.gov.br/app', position: 'right', avatar: 'random' });
+  function initVLibras() {
+    if (window.VLibras && window.VLibras.Widget) {
+      new window.VLibras.Widget({ rootPath: 'https://vlibras.gov.br/app', position: 'right', avatar: 'random' });
+    } else {
+      setTimeout(initVLibras, 300);
+    }
+  }
+
+  const vlibrasScript = document.createElement('script');
+  vlibrasScript.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+  vlibrasScript.onload = initVLibras;
+  vlibrasScript.onerror = () => console.warn('VLibras não pôde ser carregado.');
+  document.head.appendChild(vlibrasScript);
 
   let pdfDoc = null, currentPage = 1, totalPages = 0, extractedTextContent = '';
 
-  /* ── TOAST ── */
   let toastTimer;
   function toast(msg, type = 'info', duration = 3000) {
     const el = document.getElementById('toast');
@@ -422,7 +413,6 @@
     toastTimer = setTimeout(() => { el.className = ''; }, duration);
   }
 
-  /* ── DRAG & DROP ── */
   const zone = document.getElementById('uploadZone');
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
@@ -435,7 +425,6 @@
     } else { toast('Por favor, solte um arquivo PDF.', 'err'); }
   });
 
-  /* ── LOAD PDF ── */
   async function loadPDF() {
     const file = document.getElementById('fileInput').files[0];
     if (!file) { toast('Selecione um arquivo PDF primeiro.', 'err'); return; }
@@ -454,13 +443,19 @@
     }
   }
 
-  /* ── RENDER PAGE ── */
   async function renderPage(num) {
     if (!pdfDoc) return;
     const page = await pdfDoc.getPage(num);
     const canvas = document.getElementById('pdfCanvas');
     const ctx = canvas.getContext('2d');
-    const vp = page.getViewport({ scale: 1.4 });
+
+    // Escala maior para aproveitar o espaço expandido
+    const wrap = document.getElementById('pdfViewerWrap');
+    const availableWidth = wrap.clientWidth - 32;
+    const baseVp = page.getViewport({ scale: 1 });
+    const scale = Math.min(availableWidth / baseVp.width, 1.8);
+
+    const vp = page.getViewport({ scale });
     canvas.width = vp.width; canvas.height = vp.height;
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
@@ -475,14 +470,12 @@
     document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
   }
 
-  /* ── EXTRACT TEXT ── */
   async function extractCurrentPageText() {
     if (!pdfDoc) return;
     toast('Extraindo texto...', 'info', 99999);
     const page = await pdfDoc.getPage(currentPage);
     const content = await page.getTextContent();
 
-    // Reconstrói parágrafos usando posição Y dos itens
     let lines = [];
     let lastY = null;
     let line = '';
@@ -505,7 +498,6 @@
     toast(text ? `Texto extraído da página ${currentPage}!` : 'Nenhum texto encontrado.', text ? 'ok' : 'err');
   }
 
-  /* ── NAVIGATION ── */
   async function previousPage() {
     if (currentPage <= 1) return;
     currentPage--;
@@ -525,7 +517,6 @@
     el.classList.remove('has-text');
   }
 
-  /* ── VLIBRAS ── */
   function startVLibrasTranslation() {
     if (!extractedTextContent) { toast('Extraia o texto primeiro.', 'err'); return; }
     let attempts = 0;
@@ -538,7 +529,6 @@
     try_();
   }
 
-  /* ── CLEAR ── */
   function clearAll() {
     pdfDoc = null; currentPage = 1; totalPages = 0; extractedTextContent = '';
     document.getElementById('fileInput').value = '';
