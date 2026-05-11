@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador Automático com VLibras</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .controls {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .file-input {
+      margin: 10px 0;
+    }
+    .file-input input[type="file"] {
+      padding: 10px;
+      border: 2px solid #0066cc;
+      border-radius: 5px;
+      background: white;
+      margin: 5px;
+    }
+    .file-input button {
+      padding: 10px 20px;
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .file-input button:hover {
+      background: #0052a3;
+    }
+    .content-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .pdf-viewer {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      overflow: auto;
+      height: 600px;
+      background: #f9f9f9;
+    }
+    .pdf-canvas {
+      display: block;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+    }
+    .text-area {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      height: 600px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    .text-content {
+      font-size: 16px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+    .vlibras-controls {
+      text-align: center;
+      margin: 20px 0;
+      padding: 15px;
+      background: #e7f3ff;
+      border-radius: 8px;
+    }
+    .vlibras-controls button {
+      padding: 12px 24px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 16px;
+    }
+    .vlibras-controls button:hover {
+      background: #218838;
+    }
+    .status {
+      text-align: center;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .status.processing {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .navigation {
+      text-align: center;
+      margin: 10px 0;
+    }
+    .navigation button {
+      padding: 8px 16px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    .navigation button:hover {
+      background: #5a6268;
+    }
+    .page-info {
+      display: inline-block;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      .content-area {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🤟 Visualizador Automático com VLibras</h1>
+    
+    <div class="controls">
+      <div class="file-input">
+        <input type="file" id="fileInput" accept=".pdf" />
+        <button onclick="loadPDF()">📄 Carregar PDF</button>
+        <button onclick="clearAll()">🗑️ Limpar</button>
+      </div>
+    </div>
+
+    <div class="status" id="statusMessage" style="display: none;"></div>
+
+    <div class="navigation" id="navigation" style="display: none;">
+      <button onclick="previousPage()">⬅️ Anterior</button>
+      <span class="page-info" id="pageInfo">Página 1 de 1</span>
+      <button onclick="nextPage()">Próximo ➡️</button>
+    </div>
+
+    <div class="content-area">
+      <div class="pdf-viewer" id="pdfViewer">
+        <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+      </div>
+      
+      <div class="text-area">
+        <h3>📝 Texto da Página Atual</h3>
+        <div class="text-content" id="extractedText">
+          Carregue um PDF e clique na página para extrair o texto...
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== VLIBRAS ==================== -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    // Configurar PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // Inicializar VLibras
+    let vlibrasWidget;
+    document.addEventListener('DOMContentLoaded', function() {
+      vlibrasWidget = new window.VLibras.Widget({
+        rootPath: 'https://vlibras.gov.br/app',
+        position: 'right',
+        avatar: 'random'
+      });
+    });
+
+    // Variáveis globais
+    let pdfDoc = null;
+    let currentPage = 1;
+    let totalPages = 0;
+    let extractedTextContent = '';
+    let isTranslating = false;
+
+    // Função para mostrar status
+    function showStatus(message, type = 'processing') {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+      statusEl.style.display = 'block';
+      
+      if (type === 'success' || type === 'error') {
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    // Carregar PDF
+    async function loadPDF() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        showStatus('Por favor, selecione um arquivo PDF primeiro.', 'error');
+        return;
+      }
+
+      try {
+        showStatus('Carregando PDF...', 'processing');
+        
+        const arrayBuffer = await file.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+        
+        pdfDoc = await loadingTask.promise;
+        totalPages = pdfDoc.numPages;
+        currentPage = 1;
+        
+        showStatus(`PDF carregado! ${totalPages} páginas encontradas.`, 'success');
+        
+        // Mostrar navegação
+        document.getElementById('navigation').style.display = 'block';
+        updatePageInfo();
+        
+        // Renderizar primeira página
+        await renderPage(currentPage);
+        
+        // Adicionar evento de clique no canvas
+        const canvas = document.getElementById('pdfCanvas');
+        canvas.style.cursor = 'pointer';
+        canvas.onclick = extractCurrentPageText;
+        
+        showStatus('PDF carregado! Clique na página para extrair o texto.', 'success');
+        
+      } catch (error) {
+        console.error('Erro ao carregar PDF:', error);
+        showStatus('Erro ao carregar o PDF. Verifique o arquivo.', 'error');
+      }
+    }
+
+    // Renderizar página
+    async function renderPage(pageNum) {
+      if (!pdfDoc) return;
+      
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const canvas = document.getElementById('pdfCanvas');
+        const context = canvas.getContext('2d');
+        
+        const viewport = page.getViewport({scale: 1.5});
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        
+        await page.render(renderContext).promise;
+        
+      } catch (error) {
+        console.error('Erro ao renderizar página:', error);
+      }
+    }
+
+    // Extrair texto da página
+    async function extractTextFromPage(pageNum) {
+      if (!pdfDoc) return '';
+      
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        
+        const pageText = textContent.items
+          .map(item => item.str)
+          .join(' ');
+        
+        return pageText;
+        
+      } catch (error) {
+        console.error('Erro ao extrair texto:', error);
+        return '';
+      }
+    }
+
+    // Extrair texto da página atual ao clicar
+    async function extractCurrentPageText() {
+      if (!pdfDoc) {
+        showStatus('Carregue um PDF primeiro.', 'error');
+        return;
+      }
+
+      showStatus(`Extraindo texto da página ${currentPage}...`, 'processing');
+      
+      try {
+        const pageText = await extractTextFromPage(currentPage);
+        extractedTextContent = pageText;
+        
+        document.getElementById('extractedText').textContent = `--- Página ${currentPage} ---\n\n${pageText}`;
+        
+        showStatus(`Texto extraído da página ${currentPage}!`, 'success');
+        
+        // Ativar VLibras automaticamente
+        setTimeout(() => {
+          activateVLibrasAutomatically();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Erro ao extrair texto:', error);
+        showStatus('Erro ao extrair texto da página.', 'error');
+      }
+    }
+
+    // Navegação entre páginas
+    async function previousPage() {
+      if (currentPage <= 1) return;
+      
+      showStatus('Carregando página anterior...', 'processing');
+      
+      try {
+        currentPage--;
+        await renderPage(currentPage);
+        updatePageInfo();
+        
+        // Re-adicionar evento de clique
+        const canvas = document.getElementById('pdfCanvas');
+        canvas.style.cursor = 'pointer';
+        canvas.onclick = extractCurrentPageText;
+        
+        // Limpar texto da página anterior
+        document.getElementById('extractedText').textContent = 'Clique na página para extrair o texto...';
+        extractedTextContent = '';
+        
+        showStatus(`Página ${currentPage} carregada`, 'success');
+      } catch (error) {
+        console.error('Erro ao navegar:', error);
+        showStatus('Erro ao carregar página anterior', 'error');
+      }
+    }
+
+    async function nextPage() {
+      if (currentPage >= totalPages) return;
+      
+      showStatus('Carregando próxima página...', 'processing');
+      
+      try {
+        currentPage++;
+        await renderPage(currentPage);
+        updatePageInfo();
+        
+        // Re-adicionar evento de clique
+        const canvas = document.getElementById('pdfCanvas');
+        canvas.style.cursor = 'pointer';
+        canvas.onclick = extractCurrentPageText;
+        
+        // Limpar texto da página anterior
+        document.getElementById('extractedText').textContent = 'Clique na página para extrair o texto...';
+        extractedTextContent = '';
+        
+        showStatus(`Página ${currentPage} carregada`, 'success');
+      } catch (error) {
+        console.error('Erro ao navegar:', error);
+        showStatus('Erro ao carregar próxima página', 'error');
+      }
+    }
+
+    function updatePageInfo() {
+      document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    }
+
+    // Ativação automática do VLibras
+    function activateVLibrasAutomatically() {
+      try {
+        // Múltiplas tentativas para encontrar e ativar o VLibras
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const tryActivate = () => {
+          attempts++;
+          
+          // Tentativa 1: Botão de acesso
+          let vlibrasButton = document.querySelector('[vw-access-button]');
+          
+          // Tentativa 2: Botão dentro do wrapper
+          if (!vlibrasButton) {
+            vlibrasButton = document.querySelector('.vw-access-button');
+          }
+          
+          // Tentativa 3: Botão com classe active
+          if (!vlibrasButton) {
+            vlibrasButton = document.querySelector('.active');
+          }
+          
+          // Tentativa 4: Botão VLibras genérico
+          if (!vlibrasButton) {
+            const allButtons = document.querySelectorAll('button, div[onclick], div[role="button"]');
+            for (let btn of allButtons) {
+              if (btn.textContent && btn.textContent.toLowerCase().includes('libras')) {
+                vlibrasButton = btn;
+                break;
+              }
+            }
+          }
+          
+          if (vlibrasButton && attempts < maxAttempts) {
+            console.log('VLibras button found, clicking...', attempts);
+            vlibrasButton.click();
+            
+            // Tentar focar no conteúdo para tradução
+            setTimeout(() => {
+              focusContentForVLibras();
+            }, 2000);
+            
+            showStatus('VLibras ativado automaticamente! 🎉', 'success');
+            isTranslating = true;
+            return;
+          }
+          
+          if (attempts < maxAttempts) {
+            setTimeout(tryActivate, 500);
+          } else {
+            showStatus('VLibras não encontrado. Clique manualmente no botão azul.', 'error');
+            isTranslating = false;
+          }
+        };
+        
+        tryActivate();
+        
+      } catch (error) {
+        console.error('Erro na ativação automática:', error);
+        showStatus('Erro ao ativar VLibras. Use o botão manualmente.', 'error');
+        isTranslating = false;
+      }
+    }
+    
+    // Focar conteúdo para VLibras
+    function focusContentForVLibras() {
+      try {
+        // Selecionar o texto extraído
+        const textElement = document.getElementById('extractedText');
+        if (textElement) {
+          // Criar uma seleção de texto
+          const range = document.createRange();
+          range.selectNodeContents(textElement);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Disparar eventos de foco
+          textElement.focus();
+          
+          // Rolar para o conteúdo
+          textElement.scrollIntoView({ behavior: 'smooth' });
+          
+          console.log('Conteúdo focado para VLibras');
+        }
+      } catch (error) {
+        console.error('Erro ao focar conteúdo:', error);
+      }
+    }
+
+    // Controles VLibras
+    function startVLibrasTranslation() {
+      if (!extractedTextContent) {
+        showStatus('Extraia o texto do PDF primeiro.', 'error');
+        return;
+      }
+
+      activateVLibrasAutomatically();
+    }
+
+    function pauseVLibrasTranslation() {
+      // Implementar pausa se possível
+      showStatus('Função de pausa em desenvolvimento...', 'processing');
+    }
+
+    function stopVLibrasTranslation() {
+      isTranslating = false;
+      showStatus('Tradução parada.', 'success');
+    }
+
+    // Limpar tudo
+    function clearAll() {
+      pdfDoc = null;
+      currentPage = 1;
+      totalPages = 0;
+      extractedTextContent = '';
+      isTranslating = false;
+      
+      document.getElementById('fileInput').value = '';
+      document.getElementById('extractedText').textContent = 'Carregue um PDF para extrair o texto automaticamente...';
+      document.getElementById('navigation').style.display = 'none';
+      
+      const canvas = document.getElementById('pdfCanvas');
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      showStatus('Tudo limpo!', 'success');
+    }
+
+    // Suporte para drag and drop
+    const pdfViewer = document.getElementById('pdfViewer');
+    
+    pdfViewer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      pdfViewer.style.background = '#e7f3ff';
+    });
+    
+    pdfViewer.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      pdfViewer.style.background = '#f9f9f9';
+    });
+    
+    pdfViewer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      pdfViewer.style.background = '#f9f9f9';
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type === 'application/pdf') {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.files = files;
+        loadPDF();
+      } else {
+        showStatus('Por favor, arraste um arquivo PDF.', 'error');
+      }
+    });
+  </script>
+
+</body>
+</html>

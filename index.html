@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaprioLibras - Projeto de Acessibilidade</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .github-link {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .github-link a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .github-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>CaprioLibras 🤟</h1>
+    
+    <div class="github-link">
+      <a href="https://github.com/colegioherciliafranca-commits/capriolibras" target="_blank">
+        Ver no GitHub
+      </a>
+    </div>
+    
+    <p>Esta é a página principal do projeto CaprioLibras, desenvolvido para tornar conteúdo web acessível à comunidade surda através da integração com VLibras.</p>
+    
+    <h2>Como usar:</h2>
+    <p>Clique no botão azul que aparece no canto da tela para abrir o intérprete de Libras.</p>
+    
+    <p>Você pode testar traduzindo os textos desta página.</p>
+
+    <h2>Sobre o projeto</h2>
+    <p>
+      O CaprioLibras é uma iniciativa do Colégio Hercília Franca para promover a inclusão digital 
+      e tornar o conteúdo educacional acessível para todos os alunos, incluindo a comunidade surda.
+    </p>
+
+    <h2>Recursos</h2>
+    <ul>
+      <li>Dicionário de termos em Libras</li>
+      <li>Integração com VLibras</li>
+      <li>Páginas web acessíveis</li>
+      <li><a href="visualizador-automatico.html" style="color: #0066cc;">🤖 Visualizador Automático</a></li>
+    </ul>
+
+    <p>
+      Obrigado por visitar! Este projeto está disponível no GitHub para contribuições da comunidade.
+    </p>
+  </div>
+
+  <!-- ==================== VLIBRAS ==================== -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget({
+      rootPath: 'https://vlibras.gov.br/app',
+      position: 'right',
+      avatar: 'random'
+    });
+  </script>
+
+</body>
+</html>
